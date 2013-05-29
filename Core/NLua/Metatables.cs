@@ -51,27 +51,28 @@ namespace NLua
 	{
 		internal LuaCore.lua_CFunction gcFunction, indexFunction, newindexFunction, baseIndexFunction,
 			classIndexFunction, classNewindexFunction, execDelegateFunction, callConstructorFunction, toStringFunction;
-		private Hashtable memberCache = new Hashtable ();
+		private Dictionary<object, object> memberCache = new Dictionary<object, object> ();
 		private ObjectTranslator translator;
 
 		/*
 		 * __index metafunction for CLR objects. Implemented in Lua.
 		 */
 		internal static string luaIndexFunction =
-			"local function index(obj,name)						\n" +
-				"  local meta=getmetatable(obj)						\n" +
-				"  local cached=meta.cache[name]					\n" +
-				"  if cached~=nil  then								\n" +
-				"	return cached									\n" +
-				"  else												\n" +
-				"	local value,isFunc=get_object_member(obj,name)	\n" +
-				"	if isFunc then									\n" +
-				"	  meta.cache[name]=value						\n" +
-				"	end												\n" +
-				"	return value									\n" +
-				"  end												\n" +
-				"end												\n" +
-				"return index										";
+			@"local function index(obj,name)
+			    local meta=getmetatable(obj)
+			    local cached=meta.cache[name]
+			    if cached ~= nil then
+			       return cached
+			    else
+			       local value,isFunc = get_object_member(obj,name)
+			       
+			       if isFunc then
+					meta.cache[name]=value
+			       end
+			       return value
+			     end
+		    end
+		    return index";
 
 		public MetaFunctions (ObjectTranslator translator)
 		{
@@ -176,7 +177,11 @@ namespace NLua
 					strrep = obj.ToString ();
 				}
 
+#if WINDOWS_PHONE
+                Debug.WriteLine("{0}: ({1}) {2}", i, typestr, strrep);
+#elif !SILVERLIGHT
 				Debug.Print ("{0}: ({1}) {2}", i, typestr, strrep);
+#endif
 			}
 		}
 
@@ -470,25 +475,39 @@ namespace NLua
 		/*
 		 * Checks if a MemberInfo object is cached, returning it or null.
 		 */
-		private object checkMemberCache (Hashtable memberCache, IReflect objType, string memberName)
+		private object checkMemberCache (Dictionary<object, object> memberCache, IReflect objType, string memberName)
 		{
-			var members = (Hashtable)memberCache [objType];
-			return !members.IsNull () ? members [memberName] : null;
+			object members = null;
+
+			if (memberCache.TryGetValue(objType, out members))
+			{
+				var membersDict = members as Dictionary<object, object>;
+
+				object memberValue = null;
+
+				if (!members.IsNull() && membersDict.TryGetValue(memberName, out memberValue))
+				{
+					return memberValue;
+				}
+			}
+
+			return null;
 		}
 
 		/*
 		 * Stores a MemberInfo object in the member cache.
 		 */
-		private void setMemberCache (Hashtable memberCache, IReflect objType, string memberName, object member)
+		private void setMemberCache (Dictionary<object, object> memberCache, IReflect objType, string memberName, object member)
 		{
-			var members = (Hashtable)memberCache [objType];
+			Dictionary<object, object> members = null;
+			object memberCacheValue = null;
 
-			if (members.IsNull ()) {
-				members = new Hashtable ();
-				memberCache [objType] = members;
+			if (memberCache.TryGetValue(objType, out memberCacheValue)) {
+				members = (Dictionary<object, object>)memberCacheValue;
+			} else {
+				members = new Dictionary<object, object>();
+				memberCache[objType] = members;
 			}
-
-			members [memberName] = member;
 		}
 
 		/*
@@ -553,9 +572,11 @@ namespace NLua
 					} else
 						translator.throwError (luaState, detailMessage); // Pass the original message from trySetMember because it is probably best
 				}
+#if !SILVERLIGHT
 			} catch (SEHException) {
 				// If we are seeing a C++ exception - this must actually be for Lua's private use.  Let it handle it
 				throw;
+#endif
 			} catch (Exception e) {
 				ThrowError (luaState, e);
 			}
@@ -793,7 +814,47 @@ namespace NLua
 			LuaLib.lua_pushnil (luaState);
 			return 1;
 		}
+		private static bool IsInteger(double x) {
+			return Math.Ceiling(x) == x;	
+		}
 
+
+		internal Array TableToArray (object luaParamValue, Type paramArrayType)
+		{
+			Array paramArray;
+
+			if (luaParamValue is LuaTable) {
+				LuaTable table = (LuaTable)luaParamValue;
+				IDictionaryEnumerator tableEnumerator = table.GetEnumerator ();
+				tableEnumerator.Reset ();
+				paramArray = Array.CreateInstance (paramArrayType, table.Values.Count);
+
+				int paramArrayIndex = 0;
+
+				while (tableEnumerator.MoveNext ()) {
+
+					object value = tableEnumerator.Value;
+
+					if (paramArrayType == typeof (object)) {
+						if (value != null && value.GetType () == typeof (double) && IsInteger ((double)value))
+							value = Convert.ToInt32 ((double)value);
+					}
+#if SILVERLIGHT
+					paramArray.SetValue (Convert.ChangeType (value, paramArrayType, System.Globalization.CultureInfo.InvariantCulture), paramArrayIndex);
+#else
+					paramArray.SetValue (Convert.ChangeType (value, paramArrayType), paramArrayIndex);
+#endif
+					paramArrayIndex++;
+				}
+			} else {
+				paramArray = Array.CreateInstance (paramArrayType, 1);
+				paramArray.SetValue (luaParamValue, 0);
+			}
+
+			return paramArray;
+
+		}
+		
 		/*
 		 * Matches a method against its arguments in the Lua stack. Returns
 		 * if the match was succesful. It it was also returns the information
@@ -806,14 +867,20 @@ namespace NLua
 			var paramInfo = method.GetParameters ();
 			int currentLuaParam = 1;
 			int nLuaParams = LuaLib.lua_gettop (luaState);
-			var paramList = new ArrayList ();
+			var paramList = new List<object> ();
 			var outList = new List<int> ();
 			var argTypes = new List<MethodArgs> ();
 
 			foreach (var currentNetParam in paramInfo) {
-				if (!currentNetParam.IsIn && currentNetParam.IsOut)  // Skips out params
-					outList.Add (paramList.Add (null));
-				else if (currentLuaParam > nLuaParams) { // Adds optional parameters
+#if !SILVERLIGHT
+				if (!currentNetParam.IsIn && currentNetParam.IsOut)  // Skips out params 
+#else
+				if (currentNetParam.IsOut)  // Skips out params
+#endif
+				{					
+					paramList.Add (null);
+					outList.Add (paramList.LastIndexOf (null));
+				} else if (currentLuaParam > nLuaParams) { // Adds optional parameters
 					if (currentNetParam.IsOptional)
 						paramList.Add (currentNetParam.DefaultValue);
 					else {
@@ -821,7 +888,9 @@ namespace NLua
 						break;
 					}
 				} else if (_IsTypeCorrect (luaState, currentLuaParam, currentNetParam, out extractValue)) {  // Type checking
-					int index = paramList.Add (extractValue (luaState, currentLuaParam));
+					var value = extractValue (luaState, currentLuaParam);
+					paramList.Add (value);
+					int index = paramList.LastIndexOf (value);
 					var methodArg = new MethodArgs ();
 					methodArg.index = index;
 					methodArg.extractValue = extractValue;
@@ -833,27 +902,13 @@ namespace NLua
 					currentLuaParam++;
 				}  // Type does not match, ignore if the parameter is optional
 				else if (_IsParamsArray (luaState, currentLuaParam, currentNetParam, out extractValue)) {
+
 					object luaParamValue = extractValue (luaState, currentLuaParam);
 					var paramArrayType = currentNetParam.ParameterType.GetElementType ();
-					Array paramArray;
+					Array paramArray = TableToArray (luaParamValue, paramArrayType);
 
-					if (luaParamValue is LuaTable) {
-						var table = (LuaTable)luaParamValue;
-						var tableEnumerator = table.GetEnumerator ();
-						paramArray = Array.CreateInstance (paramArrayType, table.Values.Count);
-						tableEnumerator.Reset ();
-						int paramArrayIndex = 0;
-
-						while (tableEnumerator.MoveNext()) {
-							paramArray.SetValue (Convert.ChangeType (tableEnumerator.Value, currentNetParam.ParameterType.GetElementType ()), paramArrayIndex);
-							paramArrayIndex++;
-						}
-					} else {
-						paramArray = Array.CreateInstance (paramArrayType, 1);
-						paramArray.SetValue (luaParamValue, 0);
-					}
-
-					int index = paramList.Add (paramArray);
+					paramList.Add (paramArray);
+					int index = paramList.LastIndexOf (paramArray);
 					var methodArg = new MethodArgs ();
 					methodArg.index = index;
 					methodArg.extractValue = extractValue;

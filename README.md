@@ -14,6 +14,12 @@ NLua
 >		* Windows Phone 7 (using KopiLua)
 
 > * Fix warnings/Gendarme/FxCop issues.
+>* Contributing
+>  --------------
+> * NLua is using the Mono Code-Style http://www.mono-project.com/Coding_Guidelines .
+> * Please, do not change the line-end or re-indent the code.
+> * Run the tests before push.
+> * Avoid to push unneeded style changes (unless is really needed) renaming, move code.
 
 
 
@@ -37,6 +43,8 @@ iOS :  [![Build Status](http://jenkins-nlua.sytes.net:8080/job/NLua_iOS/badge/ic
   [3]: http://jenkins-nlua.sytes.net:8080/job/NLua_iOS/lastSuccessfulBuild/artifact/NLua.iOS.zip
   [4]: http://nvlabs.github.com/cub/download-icon.png (Download for iOS)
 
+Windows: We don't have a CI Server for Windows. 
+	 You can build NLua , you will need (msysgit, CMake, NUnit) http://screencast.com/t/rYuDtCdFG7
 ```csharp
 
 			string script = @"
