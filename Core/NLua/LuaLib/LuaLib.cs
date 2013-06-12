@@ -128,25 +128,21 @@ namespace NLua
 		// steffenj: BEGIN Lua 5.1.1 API change (lua_dofile now in LuaLib as luaL_dofile macro)
 		public static int luaL_dofile (LuaCore.lua_State luaState, string fileName)
 		{
-			int result = LuaCore.luaL_loadfile (luaState, fileName);
+			int result = LuaCore.luanet_loadfile (luaState, fileName);
 			if (result != 0)
 				return result;
 
-			return LuaCore.lua_pcall (luaState, 0, -1, 0);
+			return LuaCore.luanet_pcall (luaState, 0, -1, 0);
 		}
 
-		// steffenj: END Lua 5.1.1 API change (lua_dofile now in LuaLib as luaL_dofile)
 		public static void lua_getglobal (LuaCore.lua_State luaState, string name)
 		{
-			lua_pushstring (luaState, name);
-			LuaCore.lua_gettable (luaState, (int)LuaIndexes.Globals);
+			LuaCore.luanet_getglobal (luaState, name);
 		}
 
 		public static void lua_setglobal (LuaCore.lua_State luaState, string name)
 		{
-			lua_pushstring (luaState, name);
-			lua_insert (luaState, -2);
-			lua_settable (luaState, (int)LuaIndexes.Globals);
+			LuaCore.luanet_setglobal (luaState, name);
 		}
 
 		public static void lua_settop (LuaCore.lua_State luaState, int newTop)
@@ -306,7 +302,7 @@ namespace NLua
 
 		public static int lua_pcall (LuaCore.lua_State luaState, int nArgs, int nResults, int errfunc)
 		{
-			return LuaCore.lua_pcall (luaState, nArgs, nResults, errfunc);
+			return LuaCore.luanet_pcall (luaState, nArgs, nResults, errfunc);
 		}
 
 		public static LuaCore.lua_CFunction lua_tocfunction (LuaCore.lua_State luaState, int index)
@@ -316,7 +312,7 @@ namespace NLua
 
 		public static double lua_tonumber (LuaCore.lua_State luaState, int index)
 		{
-			return LuaCore.lua_tonumber (luaState, index);
+			return LuaCore.luanet_tonumber (luaState, index);
 		}
 
 		public static bool lua_toboolean (LuaCore.lua_State luaState, int index)
@@ -407,22 +403,27 @@ namespace NLua
 
 		public static int luaL_loadbuffer (LuaCore.lua_State luaState, string buff, string name)
 		{
-			return LuaCore.luaL_loadbuffer (luaState, buff, (uint)buff.Length, name);
+			return LuaCore.luanet_loadbuffer (luaState, buff, (uint)buff.Length, name);
 		}
 
 		public static int luaL_loadbuffer (LuaCore.lua_State luaState, byte [] buff, string name)
 		{
-			return LuaCore.luaL_loadbuffer (luaState, buff, (uint)buff.Length, name);
+			return LuaCore.luanet_loadbuffer (luaState, buff, (uint)buff.Length, name);
 		}
 
 		public static int luaL_loadfile (LuaCore.lua_State luaState, string filename)
 		{
-			return LuaCore.luaL_loadfile (luaState, filename);
+			return LuaCore.luanet_loadfile (luaState, filename);
 		}
 
 		public static bool luaL_checkmetatable (LuaCore.lua_State luaState, int index)
 		{
 			return LuaCore.luaL_checkmetatable (luaState, index);
+		}
+
+		public static int luanet_registryindex ()
+		{
+			return LuaCore.luanet_registryindex ();
 		}
 
 		public static int luanet_tonetobject (LuaCore.lua_State luaState, int index)
@@ -468,6 +469,16 @@ namespace NLua
 		public static LuaCore.LuaTag luanet_gettag ()
 		{
 			return LuaCore.luanet_gettag ();
+		}
+
+		public static void luanet_pushglobaltable (LuaCore.lua_State luaState)
+		{
+			LuaCore.luanet_pushglobaltable (luaState);
+		}
+
+		public static void luanet_popglobaltable (LuaCore.lua_State luaState)
+		{
+			LuaCore.luanet_popglobaltable (luaState);
 		}
 
 	}
