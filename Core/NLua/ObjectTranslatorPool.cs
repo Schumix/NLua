@@ -28,15 +28,17 @@ using System.Collections.Generic;
 namespace NLua
 {
 	#if USE_KOPILUA
-	using LuaCore = KopiLua.Lua;
+	using LuaCore  = KopiLua.Lua;
+	using LuaState = KopiLua.LuaState;
 	#else
-	using LuaCore = KeraLua.Lua;
+	using LuaCore  = KeraLua.Lua;
+	using LuaState = KeraLua.LuaState;
 	#endif
 
 	internal class ObjectTranslatorPool
 	{
 		private static volatile ObjectTranslatorPool instance = new ObjectTranslatorPool ();		
-		private Dictionary<LuaCore.lua_State, ObjectTranslator> translators = new Dictionary<LuaCore.lua_State, ObjectTranslator>();
+		private Dictionary<LuaState, ObjectTranslator> translators = new Dictionary<LuaState, ObjectTranslator>();
 		
 		public static ObjectTranslatorPool Instance
 		{
@@ -50,12 +52,12 @@ namespace NLua
 		{
 		}
 		
-		public void Add (LuaCore.lua_State luaState, ObjectTranslator translator)
+		public void Add (LuaState luaState, ObjectTranslator translator)
 		{
 			translators.Add(luaState , translator);			
 		}
 		
-		public ObjectTranslator Find (LuaCore.lua_State luaState)
+		public ObjectTranslator Find (LuaState luaState)
 		{
 			if (!translators.ContainsKey(luaState))
 				return null;
@@ -63,7 +65,7 @@ namespace NLua
 			return translators [luaState];
 		}
 		
-		public void Remove (LuaCore.lua_State luaState)
+		public void Remove (LuaState luaState)
 		{
 			if (!translators.ContainsKey (luaState))
 				return;

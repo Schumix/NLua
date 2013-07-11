@@ -30,14 +30,18 @@ using System.Collections.Generic;
 namespace NLua
 {
 	#if USE_KOPILUA
-	using LuaCore = KopiLua.Lua;
+	using LuaCore  = KopiLua.Lua;
+	using LuaState = KopiLua.LuaState;
+	using LuaNativeFunction = KopiLua.LuaNativeFunction;
 	#else
-	using LuaCore = KeraLua.Lua;
+	using LuaCore  = KeraLua.Lua;
+	using LuaState = KeraLua.LuaState;
+	using LuaNativeFunction = KeraLua.LuaNativeFunction;
 	#endif
 
 	public class LuaFunction : LuaBase
 	{
-		internal LuaCore.lua_CFunction function;
+		internal LuaNativeFunction function;
 
 		public LuaFunction (int reference, Lua interpreter)
 		{
@@ -46,7 +50,7 @@ namespace NLua
 			_Interpreter = interpreter;
 		}
 
-		public LuaFunction (LuaCore.lua_CFunction function, Lua interpreter)
+		public LuaFunction (LuaNativeFunction function, Lua interpreter)
 		{
 			_Reference = 0;
 			this.function = function;
@@ -57,9 +61,9 @@ namespace NLua
 		 * Calls the function casting return values to the types
 		 * in returnTypes
 		 */
-		internal object[] call (object[] args, Type[] returnTypes)
+		internal object[] Call (object[] args, Type[] returnTypes)
 		{
-			return _Interpreter.callFunction (this, args, returnTypes);
+			return _Interpreter.CallFunction (this, args, returnTypes);
 		}
 
 		/*
@@ -68,18 +72,18 @@ namespace NLua
 		 */
 		public object[] Call (params object[] args)
 		{
-			return _Interpreter.callFunction (this, args);
+			return _Interpreter.CallFunction (this, args);
 		}
 
 		/*
 		 * Pushes the function into the Lua stack
 		 */
-		internal void push (LuaCore.lua_State luaState)
+		internal void Push (LuaState luaState)
 		{
 			if (_Reference != 0)
-				LuaLib.lua_getref (luaState, _Reference);
+				LuaLib.LuaGetRef (luaState, _Reference);
 			else
-				_Interpreter.pushCSFunction (function);
+				_Interpreter.PushCSFunction (function);
 		}
 
 		public override string ToString ()
@@ -93,7 +97,7 @@ namespace NLua
 				var l = (LuaFunction)o;
 
 				if (this._Reference != 0 && l._Reference != 0)
-					return _Interpreter.compareRef (l._Reference, this._Reference);
+					return _Interpreter.CompareRef (l._Reference, this._Reference);
 				else
 					return this.function == l.function;
 			} else

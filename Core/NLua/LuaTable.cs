@@ -31,9 +31,13 @@ using System.Collections.Generic;
 namespace NLua
 {
 	#if USE_KOPILUA
-	using LuaCore = KopiLua.Lua;
+	using LuaCore  = KopiLua.Lua;
+	using LuaState = KopiLua.LuaState;
+	using LuaNativeFunction = KopiLua.LuaNativeFunction;
 	#else
-	using LuaCore = KeraLua.Lua;
+	using LuaCore  = KeraLua.Lua;
+	using LuaState = KeraLua.LuaState;
+	using LuaNativeFunction = KeraLua.LuaNativeFunction;
 	#endif
 
 	/*
@@ -55,10 +59,10 @@ namespace NLua
 		 */
 		public object this [string field] {
 			get {
-				return _Interpreter.getObject (_Reference, field);
+				return _Interpreter.GetObject (_Reference, field);
 			}
 			set {
-				_Interpreter.setObject (_Reference, field, value);
+				_Interpreter.SetObject (_Reference, field, value);
 			}
 		}
 
@@ -67,10 +71,10 @@ namespace NLua
 		 */
 		public object this [object field] {
 			get {
-				return _Interpreter.getObject (_Reference, field);
+				return _Interpreter.GetObject (_Reference, field);
 			}
 			set {
-				_Interpreter.setObject (_Reference, field, value);
+				_Interpreter.SetObject (_Reference, field, value);
 			}
 		}
 
@@ -91,27 +95,17 @@ namespace NLua
 		 * Gets an string fields of a table ignoring its metatable,
 		 * if it exists
 		 */
-		internal object rawget (string field)
+		internal object RawGet (string field)
 		{
-			return _Interpreter.rawGetObject (_Reference, field);
-		}
-
-		internal object rawgetFunction (string field)
-		{
-			object obj = _Interpreter.rawGetObject (_Reference, field);
-
-			if (obj is LuaCore.lua_CFunction)
-				return new LuaFunction ((LuaCore.lua_CFunction)obj, _Interpreter);
-			else
-				return obj;
+			return _Interpreter.RawGetObject (_Reference, field);
 		}
 
 		/*
 		 * Pushes this table into the Lua stack
 		 */
-		internal void push (LuaCore.lua_State luaState)
+		internal void Push (LuaState luaState)
 		{
-			LuaLib.lua_getref (luaState, _Reference);
+			LuaLib.LuaGetRef (luaState, _Reference);
 		}
 
 		public override string ToString ()

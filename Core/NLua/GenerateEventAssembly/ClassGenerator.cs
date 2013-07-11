@@ -28,9 +28,11 @@ using System;
 namespace NLua
 {
 	#if USE_KOPILUA
-	using LuaCore = KopiLua.Lua;
+	using LuaCore  = KopiLua.Lua;
+	using LuaState = KopiLua.LuaState;
 	#else
-	using LuaCore = KeraLua.Lua;
+	using LuaCore  = KeraLua.Lua;
+	using LuaState = KeraLua.LuaState;
 	#endif
 	/*
 	 * Class used for generating delegates that get a table from the Lua
@@ -44,15 +46,15 @@ namespace NLua
 		private ObjectTranslator translator;
 		private Type klass;
 
-		public ClassGenerator (ObjectTranslator translator, Type klass)
+		public ClassGenerator (ObjectTranslator objTranslator, Type typeClass)
 		{
-			this.translator = translator;
-			this.klass = klass;
+			translator = objTranslator;
+			klass = typeClass;
 		}
 
-		public object extractGenerated (LuaCore.lua_State luaState, int stackPos)
+		public object ExtractGenerated (LuaState luaState, int stackPos)
 		{
-			return CodeGeneration.Instance.GetClassInstance (klass, translator.getTable (luaState, stackPos));
+			return CodeGeneration.Instance.GetClassInstance (klass, translator.GetTable (luaState, stackPos));
 		}
 	}
 }
