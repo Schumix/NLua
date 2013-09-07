@@ -10,7 +10,7 @@ NLua
 >	 	* Android (port means create the project files + make files, no code change needed)
 > 		* iOS (done)
 >		* Windows/Linux/Mac (done)
->		* Windows Phone 8 (bind using C++/CX instead p/Inoke like SharpDX)
+>		* Windows Phone 8 (done)
 >		* Windows Phone 7 (done)
 
 > * Fix warnings/Gendarme/FxCop issues.
@@ -25,22 +25,22 @@ NLua
 
 [![Logo](https://secure.gravatar.com/avatar/77ecf0fb9d8419be7715c6e822e66562?s=150)]()
 
-NLua is a fork of project NLua (from Fábio Mascarenhas/Craig Presti).
+NLua is a fork of project LuaInterface (from Fábio Mascarenhas/Craig Presti).
 
 NLua allow use Lua from C#, using Windows, Linux, Mac, iOS , Android, Windows Phone 7 and Windows Phone 8.
 
 Linux: [![Build Status](https://travis-ci.org/NLua/NLua.png?branch=master)](https://travis-ci.org/NLua/NLua)
 
-OSX: [![Build Status](http://jenkins-nlua.sytes.net:8080/job/NLua/badge/icon)](http://jenkins-nlua.sytes.net:8080/job/NLua/) 
+OSX: [![Build Status](http://codefoco.com:8080/job/NLua/badge/icon)](http://codefoco.com:8080/job/NLua/) 
 **Download** [![dwn_osx][2]][1]
 
-  [1]: http://jenkins-nlua.sytes.net:8080/job/NLua/lastSuccessfulBuild/artifact/NLua.OSX.zip
+  [1]: http://codefoco.com:8080/job/NLua/lastSuccessfulBuild/artifact/NLua.OSX.zip
   [2]: http://nvlabs.github.com/cub/download-icon.png (Download for OSX)
 
-iOS :  [![Build Status](http://jenkins-nlua.sytes.net:8080/job/NLua_iOS/badge/icon)](http://jenkins-nlua.sytes.net:8080/job/NLua_iOS/)
+iOS :  [![Build Status](http://codefoco.com:8080/job/NLua_iOS/badge/icon)](http://codefoco.com:8080/job/NLua_iOS/)
 **Download** [![dwn_ios][4]][3]
 
-  [3]: http://jenkins-nlua.sytes.net:8080/job/NLua_iOS/lastSuccessfulBuild/artifact/NLua.iOS.zip
+  [3]: http://codefoco.com:8080/job/NLua_iOS/lastSuccessfulBuild/artifact/NLua.iOS.zip
   [4]: http://nvlabs.github.com/cub/download-icon.png (Download for iOS)
   
 Win32: **Download** [![dwn_w32][6]][5]
@@ -57,6 +57,11 @@ Windows Phone 7: **Download** [![dwn_wp7][10]][9]
 
   [9]: https://www.dropbox.com/s/c08wphdmk5o7tdx/NLua.WP7.zip
   [10]: http://nvlabs.github.com/cub/download-icon.png (Download for Windows Phone 7)
+  
+Windows Phone 8: **Download** [![dwn_wp8][12]][11]
+
+  [11]: https://www.dropbox.com/s/47qqimfnux104a7/NLua.WP8.zip
+  [12]: http://nvlabs.github.com/cub/download-icon.png (Download for Windows Phone 8 (ARM+x86))
 
 Windows: We don't have a CI Server for Windows. 
 	 You can build NLua , you will need (msysgit, CMake, NUnit) http://screencast.com/t/rYuDtCdFG7

@@ -11,25 +11,29 @@
     <RootNamespace>NLua</RootNamespace>
     <AssemblyName>NLua</AssemblyName>
     <ReleaseVersion>2.x</ReleaseVersion>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>True</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>False</Optimize>
-    <OutputPath>..\..\Run\Debug</OutputPath>
-    <DefineConstants>USE_KOPILUA;DEBUG</DefineConstants>
+    <OutputPath>..\..\Run\Debug\net45\</OutputPath>
+    <DefineConstants>DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>none</DebugType>
     <Optimize>True</Optimize>
-    <OutputPath>..\..\Run\Release</OutputPath>
-    <DefineConstants>USE_KOPILUA;RELEASE</DefineConstants>
+    <OutputPath>..\..\Run\Release\net45\</OutputPath>
+    <DefineConstants>RELEASE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'DebugKopiLua|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
@@ -40,10 +44,12 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'ReleaseKopiLua|AnyCPU'">
     <OutputPath>bin\ReleaseKopiLua\</OutputPath>
     <DefineConstants>USE_KOPILUA</DefineConstants>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -102,15 +108,14 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-  <ItemGroup />
   <ItemGroup>
-    <ProjectReference Include="..\KeraLua\src\KeraLua.csproj">
-      <Project>{47153754-10F5-44D8-B578-F5A32B69061A}</Project>
-      <Name>KeraLua</Name>
+    <ProjectReference Include="..\KeraLua\src\KeraLua.Net45.csproj">
+      <Project>{47153754-10f5-44d8-b578-f5a32b69061a}</Project>
+      <Name>KeraLua.Net45</Name>
     </ProjectReference>
-    <ProjectReference Include="..\KopiLua\KopiLua\KopiLua.csproj">
-      <Project>{E8DDBC21-EF74-4ABA-9C49-BFC702BE25D8}</Project>
-      <Name>KopiLua</Name>
+    <ProjectReference Include="..\KopiLua\KopiLua\KopiLua.Net45.csproj">
+      <Project>{e8ddbc21-ef74-4aba-9c49-bfc702be25d8}</Project>
+      <Name>KopiLua.Net45</Name>
     </ProjectReference>
   </ItemGroup>
 </Project>
