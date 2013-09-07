@@ -1,10 +1,10 @@
 
-EXTRA_DIST =  expansions.m4 lib/nunit/nunit.framework.dll
+EXTRA_DIST =  expansions.m4
 
 #Warning: This is an automatically generated file, do not edit!
 if ENABLE_DEBUG
- SUBDIRS =  Core NLuaTest ConsoleTest Applications/LuaRunner
+ SUBDIRS =  Core
 endif
 if ENABLE_RELEASE
- SUBDIRS =  Core NLuaTest ConsoleTest Applications/LuaRunner
+ SUBDIRS =  Core
 endif

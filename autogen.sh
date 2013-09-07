@@ -1,6 +1,6 @@
 #! /bin/sh
 
-PROJECT=NLua
+PROJECT=NLua.Schumix
 FILE=
 CONFIGURE=configure.ac
 

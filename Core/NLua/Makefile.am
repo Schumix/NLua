@@ -4,47 +4,47 @@ EXTRA_DIST =
 # Warning: This is an automatically generated file, do not edit!
 
 if ENABLE_DEBUG
-ASSEMBLY_COMPILER_COMMAND = gmcs
-ASSEMBLY_COMPILER_FLAGS =  -noconfig -codepage:utf8 -warn:4 -optimize- -debug "-define:USE_KOPILUA;DEBUG"
-ASSEMBLY = ../../Run/Debug/NLua.dll
+ASSEMBLY_COMPILER_COMMAND = dmcs
+ASSEMBLY_COMPILER_FLAGS =  -noconfig -codepage:utf8 -warn:4 -optimize- -debug "-define:DEBUG;USE_KOPILUA"
+ASSEMBLY = ../../Run/Debug/net40/NLua.dll
 ASSEMBLY_MDB = $(ASSEMBLY).mdb
 COMPILE_TARGET = library
 PROJECT_REFERENCES =  \
-	../KeraLua/src/bin/Debug/KeraLua.dll \
-	../KopiLua/Bin/Debug/KopiLua.dll
-BUILD_DIR = ../../Run/Debug
+	../KeraLua/src/bin/Debug/net40/KeraLua.dll \
+	../KopiLua/Bin/Debug/net40/KopiLua.dll
+BUILD_DIR = ../../Run/Debug/net40/
 
-NLUA_DLL_MDB_SOURCE=../../Run/Debug/NLua.dll.mdb
+NLUA_DLL_MDB_SOURCE=../../Run/Debug/net40/NLua.dll.mdb
 NLUA_DLL_MDB=$(BUILD_DIR)/NLua.dll.mdb
-KERALUA_DLL_SOURCE=../KeraLua/src/bin/Debug/KeraLua.dll
-KERALUA_DLL_MDB_SOURCE=../KeraLua/src/bin/Debug/KeraLua.dll.mdb
+KERALUA_DLL_SOURCE=../KeraLua/src/bin/Debug/net40/KeraLua.dll
+KERALUA_DLL_MDB_SOURCE=../KeraLua/src/bin/Debug/net40/KeraLua.dll.mdb
 KERALUA_DLL_MDB=$(BUILD_DIR)/KeraLua.dll.mdb
-KOPILUA_DLL_SOURCE=../KopiLua/Bin/Debug/KopiLua.dll
-KOPILUA_DLL_MDB_SOURCE=../KopiLua/Bin/Debug/KopiLua.dll.mdb
+KOPILUA_DLL_SOURCE=../KopiLua/Bin/Debug/net40/KopiLua.dll
+KOPILUA_DLL_MDB_SOURCE=../KopiLua/Bin/Debug/net40/KopiLua.dll.mdb
 KOPILUA_DLL_MDB=$(BUILD_DIR)/KopiLua.dll.mdb
 
 endif
 
 if ENABLE_RELEASE
-ASSEMBLY_COMPILER_COMMAND = gmcs
-ASSEMBLY_COMPILER_FLAGS =  -noconfig -codepage:utf8 -warn:4 -optimize+ "-define:USE_KOPILUA;RELEASE"
-ASSEMBLY = ../../Run/Release/NLua.dll
+ASSEMBLY_COMPILER_COMMAND = dmcs
+ASSEMBLY_COMPILER_FLAGS =  -noconfig -codepage:utf8 -warn:4 -optimize+ "-define:RELEASE;USE_KOPILUA"
+ASSEMBLY = ../../Run/Release/net40/NLua.dll
 ASSEMBLY_MDB = 
 COMPILE_TARGET = library
 PROJECT_REFERENCES =  \
-	../KeraLua/src/bin/Release/KeraLua.dll \
-	../KopiLua/Bin/Release/KopiLua.dll
-BUILD_DIR = ../../Run/Release
+	../KeraLua/src/bin/Release/net40/KeraLua.dll \
+	../KopiLua/Bin/Release/net40/KopiLua.dll
+BUILD_DIR = ../../Run/Release/net40/
 
 NLUA_DLL_MDB=
-KERALUA_DLL_SOURCE=../KeraLua/src/bin/Release/KeraLua.dll
+KERALUA_DLL_SOURCE=../KeraLua/src/bin/Release/net40/KeraLua.dll
 KERALUA_DLL_MDB=
-KOPILUA_DLL_SOURCE=../KopiLua/Bin/Release/KopiLua.dll
+KOPILUA_DLL_SOURCE=../KopiLua/Bin/Release/net40/KopiLua.dll
 KOPILUA_DLL_MDB=
 
 endif
 
-AL=al2
+AL=al
 SATELLITE_ASSEMBLY_NAME=$(notdir $(basename $(ASSEMBLY))).resources.dll
 
 PROGRAMFILES = \
@@ -55,7 +55,7 @@ PROGRAMFILES = \
 	$(KOPILUA_DLL_MDB)  
 
 LINUX_PKGCONFIG = \
-	$(NLUA_PC)  
+	$(NLUA_SCHUMIX_PC)  
 
 
 RESGEN=resgen2
@@ -110,7 +110,7 @@ DATA_FILES =
 RESOURCES = 
 
 EXTRAS = \
-	nlua.pc.in 
+	nlua.schumix.pc.in 
 
 REFERENCES =  \
 	System \
@@ -126,13 +126,13 @@ include $(top_srcdir)/Makefile.include
 
 KERALUA_DLL = $(BUILD_DIR)/KeraLua.dll
 KOPILUA_DLL = $(BUILD_DIR)/KopiLua.dll
-NLUA_PC = $(BUILD_DIR)/nlua.pc
+NLUA_SCHUMIX_PC = $(BUILD_DIR)/nlua.schumix.pc
 
 $(eval $(call emit-deploy-target,KERALUA_DLL))
 $(eval $(call emit-deploy-target,KERALUA_DLL_MDB))
 $(eval $(call emit-deploy-target,KOPILUA_DLL))
 $(eval $(call emit-deploy-target,KOPILUA_DLL_MDB))
-$(eval $(call emit-deploy-wrapper,NLUA_PC,nlua.pc))
+$(eval $(call emit-deploy-wrapper,NLUA_SCHUMIX_PC,nlua.schumix.pc))
 
 
 $(eval $(call emit_resgen_targets))

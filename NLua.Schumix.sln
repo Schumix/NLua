@@ -1,0 +1,50 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{B8664957-CB71-4F11-A4DB-59E7514BC5F3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KopiLua.Schumix", "Core\KopiLua\KopiLua\KopiLua.Schumix.csproj", "{E8DDBC21-EF74-4ABA-9C49-BFC702BE25D8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NLua.Schumix", "Core\NLua\NLua.Schumix.csproj", "{F55CABBB-4108-4A39-94E1-581FD46DC021}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KeraLua.Schumix", "Core\KeraLua\src\KeraLua.Schumix.csproj", "{47153754-10F5-44D8-B578-F5A32B69061A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{47153754-10F5-44D8-B578-F5A32B69061A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{47153754-10F5-44D8-B578-F5A32B69061A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{47153754-10F5-44D8-B578-F5A32B69061A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{47153754-10F5-44D8-B578-F5A32B69061A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E8DDBC21-EF74-4ABA-9C49-BFC702BE25D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E8DDBC21-EF74-4ABA-9C49-BFC702BE25D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E8DDBC21-EF74-4ABA-9C49-BFC702BE25D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E8DDBC21-EF74-4ABA-9C49-BFC702BE25D8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F55CABBB-4108-4A39-94E1-581FD46DC021}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F55CABBB-4108-4A39-94E1-581FD46DC021}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F55CABBB-4108-4A39-94E1-581FD46DC021}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F55CABBB-4108-4A39-94E1-581FD46DC021}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{E8DDBC21-EF74-4ABA-9C49-BFC702BE25D8} = {B8664957-CB71-4F11-A4DB-59E7514BC5F3}
+		{F55CABBB-4108-4A39-94E1-581FD46DC021} = {B8664957-CB71-4F11-A4DB-59E7514BC5F3}
+		{47153754-10F5-44D8-B578-F5A32B69061A} = {B8664957-CB71-4F11-A4DB-59E7514BC5F3}
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = Core\KopiLua\KopiLua\KopiLua.Schumix.csproj
+		Policies = $0
+		$0.TextStylePolicy = $1
+		$1.FileWidth = 120
+		$1.TabsToSpaces = False
+		$1.inheritsSet = VisualStudio
+		$1.inheritsScope = text/plain
+		description = NLua
+		version = 2.x
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
