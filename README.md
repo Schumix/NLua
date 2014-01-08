@@ -1,4 +1,4 @@
-NLua
+NLua [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/Schumix/nlua/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
 ========
 
 
