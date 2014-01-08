@@ -13,7 +13,7 @@ Example: using NLua from command line.
 
 NLua allow use Lua from C#, using Windows, Linux, Mac, iOS , Android, Windows Phone 7 and Windows Phone 8.
 
-Linux: [![Build Status](https://travis-ci.org/NLua/NLua.png?branch=master)](https://travis-ci.org/NLua/NLua)
+Linux: [![Build Status](https://travis-ci.org/Schumix/NLua.png)](https://travis-ci.org/Schumix/NLua)
 
 OSX: [![Build Status](http://codefoco.com:8080/job/NLua/badge/icon)](http://codefoco.com:8080/job/NLua/) 
 **Download** [![dwn_osx][2]][1]
