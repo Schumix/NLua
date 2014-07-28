@@ -120,6 +120,20 @@ namespace NLuaTest
 		}
 
 		[Test]
+		public void TestStructHashesEqual()
+		{
+			using (Lua lua = new Lua())
+			{
+				lua.DoString("luanet.load_assembly('NLuaTest')");
+				lua.DoString("TestStruct=luanet.import_type('NLuaTest.Mock.TestStruct')");
+				lua.DoString("struct1=TestStruct(0)");
+				lua.DoString("struct2=TestStruct(0)");
+				lua.DoString("struct2.val=1");
+				Assert.AreEqual(0, (double)lua["struct1.val"]);
+			}
+		}
+
+		[Test]
 		public void TestMethodOverloads ()
 		{
 			using (Lua lua = new Lua ()) {
@@ -1877,6 +1891,36 @@ namespace NLuaTest
 				double num = lua.GetNumber ("a");
 				//Console.WriteLine("a="+num);
 				Assert.AreEqual (num, 2d);
+			}
+		}
+
+		[Test]
+		public void TestDebugHook ()
+		{
+			int [] lines = { 1, 2, 1, 3 };
+			int line = 0;
+
+			using (Lua lua = new Lua ()) {
+				lua.DebugHook += (sender,args) => {
+					Assert.AreEqual (args.LuaDebug.currentline,lines [line]);
+					line ++;
+				};
+				lua.SetDebugHook (NLua.Event.EventMasks.LUA_MASKLINE, 0);
+
+				lua.DoString (@"function testing_hooks() return 10 end
+							val = testing_hooks() 
+							val = val + 1");
+			}
+		}
+
+		[Test]
+		public void TestKeyWithDots ()
+		{
+			using (Lua lua = new Lua ()) {
+				lua.DoString (@"g_dot = {} 
+							 g_dot['key.with.dot'] = 42");
+
+				Assert.AreEqual (42, (int)(double)lua ["g_dot.key\\.with\\.dot"]);
 			}
 		}
 

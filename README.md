@@ -5,30 +5,29 @@ NLua [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/Schumix/nlua/trend.
 
 [![Logo](https://secure.gravatar.com/avatar/77ecf0fb9d8419be7715c6e822e66562?s=150)]()
 
-NLua is a fork of project LuaInterface (from Fábio Mascarenhas/Craig Presti).
+NLua is a fork project of LuaInterface (from Fábio Mascarenhas/Craig Presti).
 
 [![Cmd](https://raw.github.com/NLua/NLua/master/NLuaCommand.gif)]()
 
 Example: using NLua from command line.
 
-NLua allow use Lua from C#, using Windows, Linux, Mac, iOS , Android, Windows Phone 7 and Windows Phone 8.
+NLua allows the usage of Lua from C#, on Windows, Linux, Mac, iOS , Android, Windows Phone 7 and 8.
 
 Linux: [![Build Status](https://travis-ci.org/Schumix/NLua.png?branch=master)](https://travis-ci.org/Schumix/NLua)
 
-OSX: [![Build Status](http://codefoco.zapto.org:8085/job/NLua/badge/icon)](http://codefoco.zapto.org:8085/job/NLua/) 
+OSX: [![Build Status](http://codefoco.zapto.org:8085/buildStatus/icon?job=NLua)](http://codefoco.zapto.org:8085/job/NLua/) 
 **Download** [![dwn_osx][2]][1]
 
-  [1]: http://codefoco.zapto.org:8085/job/NLua/lastSuccessfulBuild/artifact/NLua.OSX.zip
+  [1]: https://www.dropbox.com/s/w99igtc12uocq4k/NLua.OSX.zip
   [2]: http://nvlabs.github.com/cub/download-icon.png (Download for OSX)
 
-iOS :  [![Build Status](http://codefoco.zapto.org:8085/job/NLua_iOS/badge/icon)](http://codefoco.zapto.org:8085/job/NLua_iOS/)
+iOS :  [![Build Status](http://codefoco.zapto.org:8085/buildStatus/icon?job=NLua_iOS)](http://codefoco.zapto.org:8085/job/NLua_iOS/)
 **Download** [![dwn_ios][4]][3]
 
-  [3]: http://codefoco..zapto.org:8085/job/NLua_iOS/lastSuccessfulBuild/artifact/NLua.iOS.zip
+  [3]: https://www.dropbox.com/s/s3xte19719446lx/NLua.iOS.zip
   [4]: http://nvlabs.github.com/cub/download-icon.png (Download for iOS)
 
-Android: **Download** [![dwn_android][6]][5]
-
+Android: [![Build Status](http://codefoco.zapto.org:8085/buildStatus/icon?job=NLua_Android)](http://codefoco.zapto.org:8085/job/NLua_Android/)**Download** [![dwn_android][6]][5]
   [5]: https://www.dropbox.com/s/mjet2sh67e7y6xo/NLua.Android.zip
   [6]: http://nvlabs.github.com/cub/download-icon.png (Download for Android)
   
@@ -52,10 +51,10 @@ Windows Phone 8: **Download** [![dwn_wp8][14]][13]
   [13]: https://www.dropbox.com/s/47qqimfnux104a7/NLua.WP8.zip?
   [14]: http://nvlabs.github.com/cub/download-icon.png (Download for Windows Phone 8 (ARM+x86))
 
-Unity3D support on branch [unity3d](https://github.com/NLua/NLua/tree/unity3d) by [miaodadao](https://github.com/miaodadao).
+Unity3D support branch:  [unity3d](https://github.com/NLua/NLua/tree/unity3d) by [miaodadao](https://github.com/miaodadao).
 
-Windows: We don't have a CI Server for Windows. 
-	 You can build NLua , you will need (msysgit, CMake, NUnit) http://screencast.com/t/rYuDtCdFG7
+Windows: We don't have a CI Server for Windows yet. 
+	 To build NLua you will need msysgit, CMake and NUnit http://screencast.com/t/rYuDtCdFG7
 ```csharp
 
 			string script = @"
@@ -92,9 +91,12 @@ Windows: We don't have a CI Server for Windows.
 			}
 ```
 
-Copyright (c) 2013 Vinicius Jarina (viniciusjarina@gmail.com)
+Copyright (c) 2014 Vinicius Jarina (viniciusjarina@gmail.com)
 
+NLua 1.3.1
+----------
 
+Soon
 
 NLua 1.3.0
 ----------
@@ -122,7 +124,7 @@ NLua 1.0.0
 
 
 >###Help NLua###
-> If you are using NLua consider to help with some easy todo items.
+> If you are using NLua, consider helping with some easy todo items.
 >
 >### TODO: ###
 > * Windows CI server.
@@ -135,10 +137,10 @@ NLua 1.0.0
 > * Fix warnings/Gendarme/FxCop issues.
 >* Contributing
 >  --------------
-> * NLua is using the Mono Code-Style http://www.mono-project.com/Coding_Guidelines .
+> * NLua uses the Mono Code-Style http://www.mono-project.com/Coding_Guidelines .
 > * Please, do not change the line-end or re-indent the code.
-> * Run the tests before push.
-> * Avoid to push unneeded style changes (unless is really needed) renaming, move code.
+> * Run the tests before you push.
+> * Avoid pushing style changes (unless they are really needed), renaming and move code.
 
 
 
@@ -157,13 +159,15 @@ lua51.dll and lua51.exe are Copyright (c) 2005 Tecgraf, PUC-Rio
 Getting started with NLua:
 -------------------------
 
-* Look at src/TestNLua/TestLua to see example usage from C# 
-(optionally run this from inside of the NLua solution in 
-the debugger).  Also provides a good example of how to override .net 
-methods from Lua and use NLua from within your .NET application.
+* Look at src/TestNLua/TestLua to see an example of usage from C# 
+(optionally you can run this from inside the NLua solution using the debugger).  
+Also provides a good example of how to override .NET methods of Lua and usage of NLua
+from within your .NET application.
+
 * Look at samples/testluaform.lua to see examples of how to use 
-.NET from inside Lua
-* More instructions for installing and using in the doc/guide.pdf file.
+.NET inside Lua
+
+* More installation and usage instructions in the doc/guide.pdf file.
 
 What's new in LuaInterface 2.0.3
 ------------------------------
