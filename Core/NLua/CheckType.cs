@@ -1,7 +1,7 @@
 /*
  * This file is part of NLua.
  * 
- * Copyright (c) 2013 Vinicius Jarina (viniciusjarina@gmail.com)
+ * Copyright (c) 2014 Vinicius Jarina (viniciusjarina@gmail.com)
  * Copyright (C) 2003-2005 Fabio Mascarenhas de Queiroz.
  * Copyright (C) 2012 Megax <http://megax.yeahunter.hu/>
  * 
@@ -47,13 +47,9 @@ namespace NLua
 	 */
 	sealed class CheckType
 	{
-#if SILVERLIGHT
-		private Dictionary<Type, ExtractValue> extractValues = new Dictionary<Type, ExtractValue>();
-#else
-		private Dictionary<long, ExtractValue> extractValues = new Dictionary<long, ExtractValue> ();
-#endif
-		private ExtractValue extractNetObject;
-		private ObjectTranslator translator;
+		Dictionary<Type, ExtractValue> extractValues = new Dictionary<Type, ExtractValue>();
+		ExtractValue extractNetObject;
+		ObjectTranslator translator;
 
 		public CheckType (ObjectTranslator translator)
 		{
@@ -84,7 +80,7 @@ namespace NLua
 		 * Checks if the value at Lua stack index stackPos matches paramType, 
 		 * returning a conversion function if it does and null otherwise.
 		 */
-		internal ExtractValue GetExtractor (IReflect paramType)
+		internal ExtractValue GetExtractor (ProxyType paramType)
 		{
 			return GetExtractor (paramType.UnderlyingSystemType);
 		}
@@ -130,15 +126,25 @@ namespace NLua
 				else if (luatype == LuaTypes.Number)
 					return extractValues [GetExtractDictionaryKey (typeof(double))];
 			}
+			bool netParamIsString = paramType == typeof (string) || paramType == typeof (char []);
+			bool netParamIsNumeric = paramType == typeof (int) ||
+									 paramType == typeof (uint) ||
+									 paramType == typeof (long) ||
+									 paramType == typeof (ulong) ||
+									 paramType == typeof (short) ||
+									 paramType == typeof (float) ||
+									 paramType == typeof (double) ||
+									 paramType == typeof (decimal) ||
+									 paramType == typeof (byte);
 
-			if (LuaLib.LuaIsNumber (luaState, stackPos))
-				return extractValues [extractKey];
-
-			if (paramType == typeof(bool)) {
+			if (netParamIsNumeric) {
+				if (LuaLib.LuaIsNumber (luaState, stackPos) && !netParamIsString)
+					return extractValues [extractKey];
+			} else if (paramType == typeof(bool)) {
 				if (LuaLib.LuaIsBoolean (luaState, stackPos))
 					return extractValues [extractKey];
-			} else if (paramType == typeof (string) || paramType == typeof (char [])) {
-				if (LuaLib.LuaIsString (luaState, stackPos))
+			} else if (netParamIsString) {
+				if (LuaLib.LuaNetIsStringStrict (luaState, stackPos))
 					return extractValues [extractKey];
 				else if (luatype == LuaTypes.Nil)
 					return extractNetObject; // kevinh - silently convert nil to a null string pointer
@@ -153,9 +159,9 @@ namespace NLua
 					return extractValues [extractKey];
 			} else if (typeof(Delegate).IsAssignableFrom (paramType) && luatype == LuaTypes.Function)
 				return new ExtractValue (new DelegateGenerator (translator, paramType).ExtractGenerated);
-			else if (paramType.IsInterface && luatype == LuaTypes.Table)
+			else if (paramType.IsInterface() && luatype == LuaTypes.Table)
 				return new ExtractValue (new ClassGenerator (translator, paramType).ExtractGenerated);
-			else if ((paramType.IsInterface || paramType.IsClass) && luatype == LuaTypes.Nil) {
+			else if ((paramType.IsInterface() || paramType.IsClass()) && luatype == LuaTypes.Nil) {
 				// kevinh - allow nil to be silently converted to null - extractNetObject will return null when the item ain't found
 				return extractNetObject;
 			} else if (LuaLib.LuaType (luaState, stackPos) == LuaTypes.Table) {
@@ -175,17 +181,10 @@ namespace NLua
 			return null;
 		}
 
-#if SILVERLIGHT
-		private Type GetExtractDictionaryKey(Type targetType)
+		Type GetExtractDictionaryKey(Type targetType)
 		{
 			return targetType;
 		}
-#else
-		private long GetExtractDictionaryKey(Type targetType)
-		{
-			return targetType.TypeHandle.Value.ToInt64();
-		}
-#endif
 
 		/*
 		 * The following functions return the value in the Lua stack
@@ -230,10 +229,10 @@ namespace NLua
 
 		private object GetAsInt (LuaState luaState, int stackPos)
 		{
-			int retVal = (int)LuaLib.LuaToNumber (luaState, stackPos);
-			if (retVal == 0 && !LuaLib.LuaIsNumber (luaState, stackPos))
+			if (!LuaLib.LuaIsNumber (luaState, stackPos))
 				return null;
 
+			int retVal = (int)LuaLib.LuaToNumber (luaState, stackPos);
 			return retVal;
 		}
 
@@ -309,19 +308,17 @@ namespace NLua
 
 		private object GetAsCharArray (LuaState luaState, int stackPos)
 		{
-			string retVal = LuaLib.LuaToString (luaState, stackPos).ToString ();
-			if (string.IsNullOrEmpty(retVal) && !LuaLib.LuaIsString (luaState, stackPos))
+			if (!LuaLib.LuaNetIsStringStrict (luaState, stackPos))
 				return null;
-
+			string retVal = LuaLib.LuaToString (luaState, stackPos).ToString ();
 			return retVal.ToCharArray();
 		}
 
 		private object GetAsString (LuaState luaState, int stackPos)
 		{
-			string retVal = LuaLib.LuaToString (luaState, stackPos).ToString ();
-			if (string.IsNullOrEmpty(retVal) && !LuaLib.LuaIsString (luaState, stackPos))
+			if (!LuaLib.LuaNetIsStringStrict (luaState, stackPos))
 				return null;
-
+			string retVal = LuaLib.LuaToString (luaState, stackPos).ToString ();			
 			return retVal;
 		}
 

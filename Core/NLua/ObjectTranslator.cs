@@ -1,7 +1,7 @@
 /*
  * This file is part of NLua.
  * 
- * Copyright (c) 2013 Vinicius Jarina (viniciusjarina@gmail.com)
+ * Copyright (c) 2014 Vinicius Jarina (viniciusjarina@gmail.com)
  * Copyright (C) 2003-2005 Fabio Mascarenhas de Queiroz.
  * Copyright (C) 2012 Megax <http://megax.yeahunter.hu/>
  * 
@@ -32,7 +32,6 @@ using System.Collections.Generic;
 using NLua.Method;
 using NLua.Exceptions;
 using NLua.Extensions;
-
 
 namespace NLua
 {
@@ -262,7 +261,6 @@ namespace NLua
 #if MONOTOUCH
 		[MonoTouch.MonoPInvokeCallback (typeof (LuaNativeFunction))]
 #endif
-		[System.Runtime.InteropServices.AllowReversePInvokeCalls]
 		private static int LoadAssembly (LuaState luaState)
 		{
 			var translator = ObjectTranslatorPool.Instance.Find (luaState);
@@ -277,14 +275,18 @@ namespace NLua
 				Exception exception = null;
 
 				try {
+#if NETFX_CORE
+					assembly = Assembly.Load (new AssemblyName (assemblyName));
+#else
 					assembly = Assembly.Load (assemblyName);
+#endif
 				} catch (BadImageFormatException) {
 					// The assemblyName was invalid.  It is most likely a path.
 				} catch (FileNotFoundException e) {
 					exception = e;
 				}
 
-#if !SILVERLIGHT
+#if !SILVERLIGHT && !NETFX_CORE
 				if (assembly == null) {
 					try {
 						assembly = Assembly.Load (AssemblyName.GetAssemblyName (assemblyName));
@@ -329,6 +331,16 @@ namespace NLua
 			return null;
 		}
 
+		public bool IsExtensionMethodPresent (Type type, string name)
+		{
+			return GetExtensionMethod (type, name) != null;
+		}
+
+		public MethodInfo GetExtensionMethod (Type type, string name)
+		{
+			return type.GetExtensionMethod (name, assemblies);
+		}
+
 		/*
 		 * Implementation of import_type. Returns nil if the
 		 * type is not found.
@@ -336,7 +348,6 @@ namespace NLua
 #if MONOTOUCH
 		[MonoTouch.MonoPInvokeCallback (typeof (LuaNativeFunction))]
 #endif
-		[System.Runtime.InteropServices.AllowReversePInvokeCalls]
 		private static int ImportType (LuaState luaState)
 		{
 			var translator = ObjectTranslatorPool.Instance.Find (luaState);
@@ -364,7 +375,6 @@ namespace NLua
 #if MONOTOUCH
 		[MonoTouch.MonoPInvokeCallback (typeof (LuaNativeFunction))]
 #endif
-		[System.Runtime.InteropServices.AllowReversePInvokeCalls]
 		private static int RegisterTable (LuaState luaState)
 		{
 			var translator = ObjectTranslatorPool.Instance.Find (luaState);
@@ -416,7 +426,6 @@ namespace NLua
 #if MONOTOUCH
 		[MonoTouch.MonoPInvokeCallback (typeof (LuaNativeFunction))]
 #endif
-		[System.Runtime.InteropServices.AllowReversePInvokeCalls]
 		private static int UnregisterTable (LuaState luaState)
 		{
 			var translator = ObjectTranslatorPool.Instance.Find (luaState);
@@ -461,7 +470,6 @@ namespace NLua
 #if MONOTOUCH
 		[MonoTouch.MonoPInvokeCallback (typeof (LuaNativeFunction))]
 #endif
-		[System.Runtime.InteropServices.AllowReversePInvokeCalls]
 		private static int GetMethodSignature (LuaState luaState)
 		{
 			var translator = ObjectTranslatorPool.Instance.Find (luaState);
@@ -470,12 +478,12 @@ namespace NLua
 
 		private int GetMethodSignatureInternal (LuaState luaState)
 		{
-			IReflect klass;
+			ProxyType klass;
 			object target;
 			int udata = LuaLib.LuaNetCheckUData (luaState, 1, "luaNet_class");
 
 			if (udata != -1) {
-				klass = (IReflect)objects [udata];
+				klass = (ProxyType)objects [udata];
 				target = null;
 			} else {
 				target = GetRawNetObject (luaState, 1);
@@ -486,7 +494,7 @@ namespace NLua
 					return 1;
 				}
 
-				klass = target.GetType ();
+				klass = new ProxyType(target.GetType ());
 			}
 
 			string methodName = LuaLib.LuaToString (luaState, 2).ToString ();
@@ -497,7 +505,7 @@ namespace NLua
 
 			try {
 				var method = klass.GetMethod (methodName, BindingFlags.Public | BindingFlags.Static |
-					BindingFlags.Instance | BindingFlags.FlattenHierarchy, null, signature, null);
+					BindingFlags.Instance, signature);
 				PushFunction (luaState, new LuaNativeFunction ((new LuaMethodWrapper (this, target, klass, method)).invokeFunction));
 			} catch (Exception e) {
 				ThrowError (luaState, e);
@@ -514,7 +522,6 @@ namespace NLua
 #if MONOTOUCH
 		[MonoTouch.MonoPInvokeCallback (typeof (LuaNativeFunction))]
 #endif
-		[System.Runtime.InteropServices.AllowReversePInvokeCalls]
 		private static int GetConstructorSignature (LuaState luaState)
 		{
 			var translator = ObjectTranslatorPool.Instance.Find (luaState);
@@ -523,11 +530,11 @@ namespace NLua
 
 		private int GetConstructorSignatureInternal (LuaState luaState)
 		{
-			IReflect klass = null;
+			ProxyType klass = null;
 			int udata = LuaLib.LuaNetCheckUData (luaState, 1, "luaNet_class");
 
 			if (udata != -1)
-				klass = (IReflect)objects [udata];
+				klass = (ProxyType)objects [udata];
 
 			if (klass == null)
 				ThrowError (luaState, "get_constructor_bysig: first arg is invalid type reference");
@@ -579,7 +586,11 @@ namespace NLua
 			}
 
 			// Object already in the list of Lua objects? Push the stored reference.
+#if NETFX_CORE
+			bool found = (!o.GetType().GetTypeInfo().IsValueType) && objectsBackMap.TryGetValue (o, out index);
+#else
 			bool found = (!o.GetType().IsValueType) && objectsBackMap.TryGetValue (o, out index);
+#endif
 
 			if (found) {
 				LuaLib.LuaLGetMetatable (luaState, "luaNet_objects");
@@ -736,7 +747,11 @@ namespace NLua
 		private void CollectObject (object o, int udata)
 		{
 			objects.Remove (udata);
+#if NETFX_CORE
+			if (!o.GetType ().GetTypeInfo ().IsValueType)
+#else
 			if (!o.GetType ().IsValueType)
+#endif
 				objectsBackMap.Remove (o);
 		}
 
@@ -745,8 +760,13 @@ namespace NLua
 			// New object: inserts it in the list
 			int index = nextObj++;
 			objects [index] = obj;
+#if NETFX_CORE
+			if (!obj.GetType ().GetTypeInfo().IsValueType)
+#else
 			if (!obj.GetType().IsValueType)
-				objectsBackMap [obj] = index;
+#endif
+
+			objectsBackMap [obj] = index;
 			return index;
 		}
 
@@ -893,7 +913,11 @@ namespace NLua
 			if (o is ILuaGeneratedType) {
 				// Make sure we are _really_ ILuaGenerated
 				var typ = o.GetType ();
+#if NETFX_CORE
+				return typ.ImplementInterface ("ILuaGeneratedType");
+#else
 				return typ.GetInterface ("ILuaGeneratedType", true) != null;
+#endif
 			} 
 			return false;
 		}
@@ -938,7 +962,7 @@ namespace NLua
 		internal bool MatchParameters (LuaState luaState, MethodBase method, ref MethodCache methodCache)
 		{
 			return metaFunctions.MatchParameters (luaState, method, ref methodCache);
-	}
+		}
 		
 		internal Array TableToArray(Func<int, object> luaParamValue, Type paramArrayType, int startIndex, int count) {
 			return metaFunctions.TableToArray(luaParamValue,paramArrayType, startIndex, count);
@@ -964,7 +988,6 @@ namespace NLua
 #if MONOTOUCH
 		[MonoTouch.MonoPInvokeCallback (typeof (LuaNativeFunction))]
 #endif
-		[System.Runtime.InteropServices.AllowReversePInvokeCalls]
 		private static int CType (LuaState luaState)
 		{
 			var translator = ObjectTranslatorPool.Instance.Find (luaState);
@@ -984,7 +1007,6 @@ namespace NLua
 #if MONOTOUCH
 		[MonoTouch.MonoPInvokeCallback (typeof (LuaNativeFunction))]
 #endif
-		[System.Runtime.InteropServices.AllowReversePInvokeCalls]
 		private static int EnumFromInt (LuaState luaState)
 		{
 			var translator = ObjectTranslatorPool.Instance.Find (luaState);
@@ -994,7 +1016,7 @@ namespace NLua
 		int EnumFromIntInternal (LuaState luaState)
 		{
 			Type t = TypeOf (luaState, 1);
-			if (t == null || !t.IsEnum)
+			if (t == null || !t.IsEnum ())
 				return PushError (luaState, "Not an Enum.");
 
 			object res = null;

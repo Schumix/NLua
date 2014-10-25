@@ -1,7 +1,7 @@
 /*
  * This file is part of NLua.
  * 
- * Copyright (c) 2013 Vinicius Jarina (viniciusjarina@gmail.com)
+ * Copyright (c) 2014 Vinicius Jarina (viniciusjarina@gmail.com)
  * Copyright (C) 2003-2005 Fabio Mascarenhas de Queiroz.
  * Copyright (C) 2012 Megax <http://megax.yeahunter.hu/>
  * 
@@ -70,7 +70,6 @@ namespace NLua
 		/// <summary>
 		/// Event that is raised when an exception occures during a hook call.
 		/// </summary>
-		/// <author>Reinhard Ostermeier</author>
 		public event EventHandler<HookExceptionEventArgs> HookException;
 		/// <summary>
 		/// Event when lua hook callback is called
@@ -78,12 +77,10 @@ namespace NLua
 		/// <remarks>
 		/// Is only raised if SetDebugHook is called before.
 		/// </remarks>
-		/// <author>Reinhard Ostermeier</author>
 		public event EventHandler<DebugHookEventArgs> DebugHook;
 		/// <summary>
 		/// lua hook calback delegate
 		/// </summary>
-		/// <author>Reinhard Ostermeier</author>
 		private LuaHook hookCallback = null;
 		#endregion
 		#region Globals auto-complete
@@ -174,6 +171,7 @@ local mt = {
 		local class = rawget(package, classname)
 		if class == nil then
 			class = import_type(package.packageName .. ""."" .. classname)
+			if class == nil then class = import_type(classname) end
 			package[classname] = class		-- keep what we found around, so it will be shared
 		end
 		return class
@@ -335,7 +333,6 @@ end
 #if MONOTOUCH
 		[MonoTouch.MonoPInvokeCallback (typeof (LuaNativeFunction))]
 #endif
-		[System.Runtime.InteropServices.AllowReversePInvokeCalls]
 		static int PanicCallback (LuaState luaState)
 		{
 			string reason = string.Format ("unprotected error in call to Lua API ({0})", LuaLib.LuaToString (luaState, -1));
@@ -428,7 +425,7 @@ end
 		}
 		
 		/// <summary>
-		/// 
+		/// Load a File on, and return a LuaFunction to execute the file loaded (useful to see if the syntax of a file is ok)
 		/// </summary>
 		/// <param name = "fileName"></param>
 		/// <returns></returns>
@@ -599,14 +596,14 @@ end
 				globals.Add (path + "(");
 			}
 			// If the type is a class or an interface and recursion hasn't been running too long, list the members
-			else if ((type.IsClass || type.IsInterface) && type != typeof(string) && recursionCounter < 2) {
+			else if ((type.IsClass () || type.IsInterface ()) && type != typeof(string) && recursionCounter < 2) {
 				#region Methods
 				foreach (var method in type.GetMethods(BindingFlags.Public | BindingFlags.Instance)) {
 					string name = method.Name;
 					if (
 						// Check that the LuaHideAttribute and LuaGlobalAttribute were not applied
-						(method.GetCustomAttributes (typeof(LuaHideAttribute), false).Length == 0) &&
-						(method.GetCustomAttributes (typeof(LuaGlobalAttribute), false).Length == 0) &&
+						(!method.GetCustomAttributes (typeof(LuaHideAttribute), false).Any ()) &&
+						(!method.GetCustomAttributes (typeof(LuaGlobalAttribute), false).Any ()) &&
 					// Exclude some generic .NET methods that wouldn't be very usefull in Lua
 						name != "GetType" && name != "GetHashCode" && name != "Equals" &&
 						name != "ToString" && name != "Clone" && name != "Dispose" &&
@@ -629,8 +626,8 @@ end
 				foreach (var field in type.GetFields(BindingFlags.Public | BindingFlags.Instance)) {
 					if (
 						// Check that the LuaHideAttribute and LuaGlobalAttribute were not applied
-						(field.GetCustomAttributes (typeof(LuaHideAttribute), false).Length == 0) &&
-						(field.GetCustomAttributes (typeof(LuaGlobalAttribute), false).Length == 0)) {
+						(!field.GetCustomAttributes (typeof(LuaHideAttribute), false).Any ()) &&
+						(!field.GetCustomAttributes (typeof(LuaGlobalAttribute), false).Any ())) {
 						// Go into recursion for members
 						RegisterGlobal (path + "." + field.Name, field.FieldType, recursionCounter + 1);
 					}
@@ -638,12 +635,12 @@ end
 				#endregion
 
 				#region Properties
-				foreach (var property in type.GetProperties(BindingFlags.Public | BindingFlags.Instance)) {
+				foreach (var property in type.GetProperties (BindingFlags.Public | BindingFlags.Instance)) {
 					if (
 						// Check that the LuaHideAttribute and LuaGlobalAttribute were not applied
-						(property.GetCustomAttributes (typeof(LuaHideAttribute), false).Length == 0) &&
-						(property.GetCustomAttributes (typeof(LuaGlobalAttribute), false).Length == 0)
-					// Exclude some generic .NET properties that wouldn't be very usefull in Lua
+						(!property.GetCustomAttributes (typeof(LuaHideAttribute), false).Any ()) &&
+						(!property.GetCustomAttributes (typeof(LuaGlobalAttribute), false).Any ())
+					// Exclude some generic .NET properties that wouldn't be very useful in Lua
 						&& property.Name != "Item") {
 						// Go into recursion for members
 						RegisterGlobal (path + "." + property.Name, property.PropertyType, recursionCounter + 1);
@@ -662,7 +659,7 @@ end
 			* Navigates a table in the top of the stack, returning
 			* the value of the specified field
 			*/
-		internal object GetObject (string[] remainingPath)
+		object GetObject (string[] remainingPath)
 		{
 			object returnValue = null;
 
@@ -794,7 +791,7 @@ end
 		/*
 			* Navigates a table to set the value of one of its fields
 			*/
-		internal void SetObject (string[] remainingPath, object val)
+		void SetObject (string[] remainingPath, object val)
 		{
 			for (int i = 0; i < remainingPath.Length-1; i++) {
 				LuaLib.LuaPushString (luaState, remainingPath [i]);
@@ -865,7 +862,6 @@ end
 		/// <param name = "mask">Mask</param>
 		/// <param name = "count">Count</param>
 		/// <returns>see lua docs. -1 if hook is already set</returns>
-		/// <author>Reinhard Ostermeier</author>
 		public int SetDebugHook (EventMasks mask, int count)
 		{
 			if (hookCallback == null) {
@@ -880,7 +876,6 @@ end
 		/// Removes the debug hook
 		/// </summary>
 		/// <returns>see lua docs</returns>
-		/// <author>Reinhard Ostermeier</author>
 		public int RemoveDebugHook ()
 		{
 			hookCallback = null;
@@ -891,7 +886,6 @@ end
 		/// Gets the hook mask.
 		/// </summary>
 		/// <returns>hook mask</returns>
-		/// <author>Reinhard Ostermeier</author>
 		public EventMasks GetHookMask ()
 		{
 			return (EventMasks)LuaCore.LuaGetHookMask (luaState);
@@ -901,64 +895,18 @@ end
 		/// Gets the hook count
 		/// </summary>
 		/// <returns>see lua docs</returns>
-		/// <author>Reinhard Ostermeier</author>
 		public int GetHookCount ()
 		{
 			return LuaCore.LuaGetHookCount (luaState);
 		}
 
-		/// <summary>
-		/// Gets the stack entry on a given level
-		/// </summary>
-		/// <param name = "level">level</param>
-		/// <param name = "luaDebug">lua debug structure</param>
-		/// <returns>Returns true if level was allowed, false if level was invalid.</returns>
-		/// <author>Reinhard Ostermeier</author>
-		/*public bool GetStack(int level, out LuaCore.lua_Debug luaDebug)
-		{
-			luaDebug = new LuaDebug();
-			LuaState ld = System.Runtime.InteropServices.Marshal.AllocHGlobal(System.Runtime.InteropServices.Marshal.SizeOf(luaDebug));
-			System.Runtime.InteropServices.Marshal.StructureToPtr(luaDebug, ld, false);
-			try
-			{
-				return LuaLib.lua_getstack(luaState, level, luaDebug) != 0;
-			}
-			finally
-			{
-				luaDebug = (LuaDebug)System.Runtime.InteropServices.Marshal.PtrToStructure(ld, typeof(LuaDebug));
-				System.Runtime.InteropServices.Marshal.FreeHGlobal(ld);
-			}
-		}*/
-
-		/// <summary>
-		/// Gets info (see lua docs)
-		/// </summary>
-		/// <param name = "what">what (see lua docs)</param>
-		/// <param name = "luaDebug">lua debug structure</param>
-		/// <returns>see lua docs</returns>
-		/// <author>Reinhard Ostermeier</author>
-		/*public int GetInfo(String what, ref LuaCore.lua_Debug luaDebug)
-		{
-			LuaState ld = System.Runtime.InteropServices.Marshal.AllocHGlobal(System.Runtime.InteropServices.Marshal.SizeOf(luaDebug));
-			System.Runtime.InteropServices.Marshal.StructureToPtr(luaDebug, ld, false);
-			try
-			{
-				return LuaLib.lua_getinfo(luaState, what, ld);
-			}
-			finally
-			{
-				luaDebug = (LuaDebug)System.Runtime.InteropServices.Marshal.PtrToStructure(ld, typeof(LuaDebug));
-				System.Runtime.InteropServices.Marshal.FreeHGlobal(ld);
-			}
-		}*/
-
+			
 		/// <summary>
 		/// Gets local (see lua docs)
 		/// </summary>
 		/// <param name = "luaDebug">lua debug structure</param>
 		/// <param name = "n">see lua docs</param>
 		/// <returns>see lua docs</returns>
-		/// <author>Reinhard Ostermeier</author>
 		public string GetLocal (LuaDebug luaDebug, int n)
 		{
 			return LuaCore.LuaGetLocal (luaState, luaDebug, n).ToString ();
@@ -970,10 +918,19 @@ end
 		/// <param name = "luaDebug">lua debug structure</param>
 		/// <param name = "n">see lua docs</param>
 		/// <returns>see lua docs</returns>
-		/// <author>Reinhard Ostermeier</author>
 		public string SetLocal (LuaDebug luaDebug, int n)
 		{
 			return LuaCore.LuaSetLocal (luaState, luaDebug, n).ToString ();
+		}
+
+		public int GetStack (int level, ref LuaDebug ar)
+		{
+			return LuaCore.LuaGetStack (luaState, level,ref ar);
+		}
+
+		public int GetInfo (string what, ref LuaDebug ar)
+		{
+			return LuaCore.LuaGetInfo (luaState, what, ref ar);
 		}
 
 		/// <summary>
@@ -982,7 +939,6 @@ end
 		/// <param name = "funcindex">see lua docs</param>
 		/// <param name = "n">see lua docs</param>
 		/// <returns>see lua docs</returns>
-		/// <author>Reinhard Ostermeier</author>
 		public string GetUpValue (int funcindex, int n)
 		{
 			return LuaCore.LuaGetUpValue (luaState, funcindex, n).ToString ();
@@ -994,7 +950,6 @@ end
 		/// <param name = "funcindex">see lua docs</param>
 		/// <param name = "n">see lua docs</param>
 		/// <returns>see lua docs</returns>
-		/// <author>Reinhard Ostermeier</author>
 		public string SetUpValue (int funcindex, int n)
 		{
 			return LuaCore.LuaSetUpValue (luaState, funcindex, n).ToString ();
@@ -1005,15 +960,18 @@ end
 		/// </summary>
 		/// <param name = "luaState">lua state</param>
 		/// <param name = "luaDebug">Pointer to LuaDebug (lua_debug) structure</param>
-		/// <author>Reinhard Ostermeier</author>
 		/// 
 #if MONOTOUCH
 		[MonoTouch.MonoPInvokeCallback (typeof (LuaHook))]
 #endif
-		[System.Runtime.InteropServices.AllowReversePInvokeCalls]
 #if USE_KOPILUA
 		static void DebugHookCallback (LuaState luaState, LuaDebug debug)
 		{
+#elif NETFX_CORE
+		static void DebugHookCallback (LuaState luaState, long luaDebug)
+		{
+			IntPtr ptr = new IntPtr (luaDebug);
+			LuaDebug debug = System.Runtime.InteropServices.Marshal.PtrToStructure <LuaDebug> (ptr);
 #else
 		static void DebugHookCallback (LuaState luaState, IntPtr luaDebug)
 		{	
@@ -1047,7 +1005,6 @@ end
 		/// Pops a value from the lua stack.
 		/// </summary>
 		/// <returns>Returns the top value from the lua stack.</returns>
-		/// <author>Reinhard Ostermeier</author>
 		public object Pop ()
 		{
 			int top = LuaLib.LuaGetTop (luaState);
@@ -1058,7 +1015,6 @@ end
 		/// Pushes a value onto the lua stack.
 		/// </summary>
 		/// <param name = "value">Value to push.</param>
-		/// <author>Reinhard Ostermeier</author>
 		public void Push (object value)
 		{
 			translator.Push (luaState, value);
@@ -1101,7 +1057,6 @@ end
 		/*
 		 * Gets a numeric field of the table or userdata corresponding the the provided reference
 		 */
-
 		internal object GetObject (int reference, object field)
 		{
 			int oldTop = LuaLib.LuaGetTop (luaState);
@@ -1116,7 +1071,7 @@ end
 		/*
 		 * Sets a field of the table or userdata corresponding the the provided reference
 		 * to the provided value
-		 */
+		 */		
 		internal void SetObject (int reference, string field, object val)
 		{
 			int oldTop = LuaLib.LuaGetTop (luaState);
@@ -1152,7 +1107,7 @@ end
 		{
 			// We leave nothing on the stack when we are done
 			int oldTop = LuaLib.LuaGetTop (luaState);
-			var wrapper = new LuaMethodWrapper (translator, target, function.DeclaringType, function);
+			var wrapper = new LuaMethodWrapper (translator, target, new ProxyType(function.DeclaringType), function);
 			translator.Push (luaState, new LuaNativeFunction (wrapper.invokeFunction));
 			this [path] = translator.GetObject (luaState, -1);
 			var f = GetFunction (path);
