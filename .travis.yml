@@ -12,7 +12,8 @@ install:
 script:
   - uname --all
   - git submodule update --init --recursive
-  - ./run_all.linux.sh
+#  - ./run_all.linux.sh
+  - xbuild /p:Configuration="Debug" NLua.Schumix.sln
 
 # Execute additional tests or commands
 #after_script:
